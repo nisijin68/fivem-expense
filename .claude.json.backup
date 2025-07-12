@@ -13,6 +13,10 @@
       "allowedTools": [],
       "history": [
         {
+          "display": "VITE_SUPABASE_URL=https://unwdmdgtzbhwflepabud.supabase.co\n  VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVud2RtZGd0emJod2ZsZXBhYnVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyMzUxNDYsImV4cCI6MjA2NzgxMTE0Nn0.NdaZVFAckWPbl7TOYifbJLF4F5FdBivAr7zLxK3Gpw0",
+          "pastedContents": {}
+        },
+        {
           "display": "どこから確認するのか教えて",
           "pastedContents": {}
         },
@@ -484,10 +488,6 @@
         },
         {
           "display": "ERROR:  42601: syntax error at or near \"1\"\nLINE 1: 1     UPDATE auth.users\n        ^",
-          "pastedContents": {}
-        },
-        {
-          "display": "今のURLはどこからかくにんできるの",
           "pastedContents": {}
         }
       ],

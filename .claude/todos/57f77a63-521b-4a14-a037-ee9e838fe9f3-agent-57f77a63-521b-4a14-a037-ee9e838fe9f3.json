@@ -31,7 +31,7 @@
   },
   {
     "content": "コミットしてVercelに再デプロイ",
-    "status": "in_progress",
+    "status": "completed",
     "priority": "high",
     "id": "6"
   }
