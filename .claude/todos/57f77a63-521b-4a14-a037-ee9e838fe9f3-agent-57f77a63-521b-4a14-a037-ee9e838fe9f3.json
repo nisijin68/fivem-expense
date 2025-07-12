@@ -1,0 +1,38 @@
+[
+  {
+    "content": "デプロイされたアプリのログイン画面エラーを調査",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Vercel設定とSupabase本番環境の接続確認",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "認証フロー関連のコードレビュー",
+    "status": "pending",
+    "priority": "medium",
+    "id": "3"
+  },
+  {
+    "content": "vercel.jsonを作成してSPAルーティングを修正",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "本番用の.env.productionファイルを作成",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "コミットしてVercelに再デプロイ",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "6"
+  }
+]

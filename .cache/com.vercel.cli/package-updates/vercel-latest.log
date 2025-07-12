@@ -1,0 +1,15 @@
+[2025-07-11T09:34:47.358Z] [debug] Notifying parent we're ready
+[2025-07-11T09:34:47.359Z] [debug] Received message from parent: {
+  cacheFile: '/home/kohei/.cache/com.vercel.cli/package-updates/vercel-latest.json',
+  distTag: 'latest',
+  name: 'vercel',
+  updateCheckInterval: 86400000
+}
+[2025-07-11T09:34:47.359Z] [debug] Disconnecting from parent
+[2025-07-11T09:34:47.362Z] [debug] Checking lock file: /home/kohei/.cache/com.vercel.cli/package-updates/vercel-latest.lock
+[2025-07-11T09:34:47.363Z] [debug] Initializing lock file with pid 7169
+[2025-07-11T09:34:47.364Z] [debug] Fetching https://registry.npmjs.org/-/package/vercel/dist-tags
+[2025-07-11T09:34:47.595Z] [debug] Found dist tag "latest" with version "44.4.0"
+[2025-07-11T09:34:47.595Z] [debug] Writing cache file: /home/kohei/.cache/com.vercel.cli/package-updates/vercel-latest.json
+[2025-07-11T09:34:47.595Z] [debug] Releasing lock file: /home/kohei/.cache/com.vercel.cli/package-updates/vercel-latest.lock
+[2025-07-11T09:34:47.596Z] [debug] Worker finished successfully!

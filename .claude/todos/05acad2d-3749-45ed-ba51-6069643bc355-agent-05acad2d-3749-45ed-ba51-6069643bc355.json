@@ -1,0 +1,26 @@
+[
+  {
+    "content": "修正したコードをコミット",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Vercelで直接デプロイ",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Slack通知のテスト",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "VercelとGitHubを連携して自動デプロイを設定",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  }
+]
