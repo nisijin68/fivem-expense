@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Expense, AuthUser } from '../types';
 import { formatAmount, parseAmount, parseAmountNumber } from '../utils';
 import { supabase } from '../lib/supabaseClient';
@@ -12,17 +12,14 @@ interface ExpenseFormProps {
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, expenses, setExpenses, profileName: parentProfileName }) => {
-  const [totalAmount, setTotalAmount] = useState(0);
   const [profileName, setProfileName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 合計金額を計算
-  useEffect(() => {
-    const calculatedTotal = expenses.reduce((sum, expense) => {
+  const totalAmount = useMemo(() => {
+    return expenses.reduce((sum, expense) => {
       const amount = parseAmountNumber(expense.amount || '0');
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-    setTotalAmount(calculatedTotal);
   }, [expenses]);
 
   // プロファイル名を取得

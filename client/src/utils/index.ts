@@ -10,8 +10,8 @@ export const formatAmount = (value: string): string => {
 // カンマを取り除き数値文字列を返すヘルパー関数
 export const parseAmount = (value: string): string => {
   return value
-    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
-    .replace(/[,\uFF0C]/g, '');
+    .replace(/[！-～]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[^0-9]/g, '');
 };
 
 export const parseAmountNumber = (value: string): number => {

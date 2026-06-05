@@ -377,6 +377,12 @@ const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 - TypeScriptチェック: 成功
 - ローカル確認: `http://localhost:5174` で表示確認済み
 
+### 🔧 追加修正（合計金額が表示されない対策）
+- `parseAmount()` を強化し、全角英数字・全角記号を半角化した後、数字以外を除去するよう変更
+- 端末や入力方法で `￥`、空白、全角記号などが混じっても金額として扱えるよう改善
+- `ExpenseForm.tsx` の合計金額を state 更新ではなく `useMemo()` で入力値から直接計算するよう変更
+- TypeScriptチェック: 成功
+
 ## 🔜 次回実装予定: 出張報告機能
 
 ### 📋 機能概要
