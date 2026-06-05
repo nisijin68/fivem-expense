@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Expense, AuthUser } from '../types';
-import { formatAmount, parseAmount } from '../utils';
+import { formatAmount, parseAmount, parseAmountNumber } from '../utils';
 import { supabase } from '../lib/supabaseClient';
 
 interface ExpenseFormProps {
@@ -19,7 +19,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
   // 合計金額を計算
   useEffect(() => {
     const calculatedTotal = expenses.reduce((sum, expense) => {
-      const amount = parseInt(expense.amount || '0');
+      const amount = parseAmountNumber(expense.amount || '0');
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
     setTotalAmount(calculatedTotal);
@@ -142,7 +142,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
         setIsSubmitting(false);
         return;
       }
-      const parsedAmount = parseInt(expense.amount.replace(/,/g, ''), 10);
+      const parsedAmount = parseAmountNumber(expense.amount);
       if (!expense.amount.trim() || isNaN(parsedAmount)) {
         alert('金額を正しく入力してください。');
         setIsSubmitting(false);
@@ -185,7 +185,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
       try {
         // Slackメッセージを作成（シンプル版）
         const applicantName = (parentProfileName || profileName).trim() || user.email;
-        const totalAmount = expensesToSubmit.reduce((sum, exp) => sum + (parseInt(exp.amount || '0') || 0), 0);
+        const totalAmount = expensesToSubmit.reduce((sum, exp) => sum + (parseAmountNumber(exp.amount || '0') || 0), 0);
         
         const slackPayload = {
           expense: {
@@ -400,6 +400,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
               {expense.type !== 'regular' && (
                 <button 
                   type="button" 
+                  translate="no"
                   onClick={() => handleMakeRoundTrip(index)} 
                   style={{ 
                     padding: '8px 12px', 

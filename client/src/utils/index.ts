@@ -3,13 +3,19 @@ import type { Submission, GroupedSubmissions } from '../types';
 // 金額をカンマ区切りにするヘルパー関数
 export const formatAmount = (value: string): string => {
   if (!value) return '';
-  const num = parseInt(value.replace(/,/g, ''), 10);
+  const num = parseAmountNumber(value);
   return isNaN(num) ? '' : num.toLocaleString();
 };
 
 // カンマを取り除き数値文字列を返すヘルパー関数
 export const parseAmount = (value: string): string => {
-  return value.replace(/,/g, '');
+  return value
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[,\uFF0C]/g, '');
+};
+
+export const parseAmountNumber = (value: string): number => {
+  return parseInt(parseAmount(value || '0'), 10);
 };
 
 // 申請データを年度と月ごとにグループ化するヘルパー関数

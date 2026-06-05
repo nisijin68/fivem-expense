@@ -349,6 +349,34 @@ const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 - デプロイ先: https://five-m-expense.vercel.app/
 - 自動デプロイ: Vercel（1〜2分で反映）
 
+## ✅ 2026-06-05 金額入力・往復ボタン表示修正完了
+
+### 🎯 実装した機能
+**全角数字入力対応とブラウザ翻訳対策** - 申請フォームで全角数字を入力しても合計金額・申請チェックが正常に動くよう修正
+
+#### **1. 金額入力の全角数字対応** ✅
+- `parseAmount()` に全角数字→半角数字の変換を追加
+- 全角カンマ `，` も除去対象に追加
+- `formatAmount()` も共通の金額変換処理を使用
+
+#### **2. 申請ボタンが押せない問題の修正** ✅
+- 合計金額計算で `parseAmountNumber()` を使用
+- 送信前の金額チェックで `parseAmountNumber()` を使用
+- Slack通知用の合計金額計算も同じ処理に統一
+- 全角数字 `１２３４` 入力時も `1,234円` として扱えるよう改善
+
+#### **3. 「往復」ボタンの翻訳対策** ✅
+- 「往復」ボタンに `translate="no"` を追加
+- Chrome / Safari などのブラウザ翻訳で「対抗」などに誤変換される問題を防止
+
+### 📋 修正ファイル
+- `client/src/utils/index.ts`: 金額変換処理を全角数字対応に変更
+- `client/src/components/ExpenseForm.tsx`: 合計計算・申請チェック・Slack通知用合計・往復ボタン翻訳対策を反映
+
+### ✅ 確認
+- TypeScriptチェック: 成功
+- ローカル確認: `http://localhost:5174` で表示確認済み
+
 ## 🔜 次回実装予定: 出張報告機能
 
 ### 📋 機能概要
