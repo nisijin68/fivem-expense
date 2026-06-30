@@ -41,6 +41,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingSubmissionId, setRejectingSubmissionId] = useState<string | null>(null);
 
+  // 旧サイト申請受付モードの状態（auto: 7/1以降は新サイト案内へ切替 / blocked: 日付に関係なく強制的に新サイト案内 / allowed: 強制的に旧サイトで申請を受付）
+  const [submissionMode, setSubmissionMode] = useState<'auto' | 'blocked' | 'allowed'>('auto');
+  const [loadingSubmissionMode, setLoadingSubmissionMode] = useState(false);
+
   // 印刷機能用の状態
   const [selectedForPrint, setSelectedForPrint] = useState<Set<string>>(new Set());
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -309,6 +313,49 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       fetchReportStats();
     }
   }, [activeTab, users, submissions, fetchReportStats]);
+
+  // 旧サイト申請受付モードを取得
+  useEffect(() => {
+    const fetchSubmissionMode = async () => {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'expense_submission_mode')
+        .single();
+
+      if (!error && (data?.value === 'blocked' || data?.value === 'allowed')) {
+        setSubmissionMode(data.value);
+      }
+    };
+
+    fetchSubmissionMode();
+  }, []);
+
+  // 旧サイト申請受付モードの切り替え
+  const handleChangeSubmissionMode = useCallback(async (nextMode: 'auto' | 'blocked' | 'allowed') => {
+    if (nextMode === submissionMode) return;
+
+    const confirmMessages: Record<'auto' | 'blocked' | 'allowed', string> = {
+      auto: '7/1を基準に自動で新サイト案内表示に切り替わるモードに戻します。よろしいですか？',
+      blocked: '日付に関係なく、今すぐ新サイト案内表示（旧サイト申請禁止）にします。よろしいですか？',
+      allowed: '日付に関係なく、旧サイトでの交通費申請を受付可能にします。よろしいですか？'
+    };
+
+    if (!window.confirm(confirmMessages[nextMode])) return;
+
+    setLoadingSubmissionMode(true);
+    const { error } = await supabase
+      .from('app_settings')
+      .update({ value: nextMode, updated_at: new Date().toISOString() })
+      .eq('key', 'expense_submission_mode');
+
+    if (error) {
+      alert('切り替えに失敗しました: ' + error.message);
+    } else {
+      setSubmissionMode(nextMode);
+    }
+    setLoadingSubmissionMode(false);
+  }, [submissionMode]);
 
   const handleApproval = useCallback(async (id: string, newStatus: 'pending' | 'approved' | 'rejected', reason?: string) => {
     const updateData: { 
@@ -1575,7 +1622,72 @@ ${printData.map((page) => `
         {activeTab === 'approvals' && (
           <div>
             <h3 style={{ textAlign: 'center', marginBottom: '30px', color: isDarkMode ? '#fff' : '#000' }}>承認管理</h3>
-            
+
+            {/* 新サイト移行・申請受付モード切り替え */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: 20,
+              padding: '14px',
+              borderRadius: '8px',
+              border: `1px solid ${submissionMode === 'allowed' ? '#28a745' : submissionMode === 'blocked' ? '#dc3545' : '#ffc107'}`,
+              backgroundColor: submissionMode === 'allowed' ? '#d4edda' : submissionMode === 'blocked' ? '#f8d7da' : '#fff3cd',
+              color: '#000'
+            }}>
+              <div style={{ marginBottom: 10, fontWeight: 'bold' }}>
+                旧サイトの交通費申請受付モード：
+                {submissionMode === 'allowed' && '受付中（強制）'}
+                {submissionMode === 'blocked' && '新サイト案内表示中（強制）'}
+                {submissionMode === 'auto' && '自動（7/1以降は新サイト案内表示）'}
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => handleChangeSubmissionMode('auto')}
+                  disabled={loadingSubmissionMode || submissionMode === 'auto'}
+                  style={{
+                    padding: '8px 14px',
+                    backgroundColor: submissionMode === 'auto' ? '#6c757d' : '#ffc107',
+                    color: submissionMode === 'auto' ? 'white' : '#000',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: (loadingSubmissionMode || submissionMode === 'auto') ? 'not-allowed' : 'pointer',
+                    opacity: (loadingSubmissionMode || submissionMode === 'auto') ? 0.7 : 1
+                  }}
+                >
+                  自動（7/1基準）に戻す
+                </button>
+                <button
+                  onClick={() => handleChangeSubmissionMode('blocked')}
+                  disabled={loadingSubmissionMode || submissionMode === 'blocked'}
+                  style={{
+                    padding: '8px 14px',
+                    backgroundColor: submissionMode === 'blocked' ? '#6c757d' : '#dc3545',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: (loadingSubmissionMode || submissionMode === 'blocked') ? 'not-allowed' : 'pointer',
+                    opacity: (loadingSubmissionMode || submissionMode === 'blocked') ? 0.7 : 1
+                  }}
+                >
+                  今すぐ新サイト案内を表示
+                </button>
+                <button
+                  onClick={() => handleChangeSubmissionMode('allowed')}
+                  disabled={loadingSubmissionMode || submissionMode === 'allowed'}
+                  style={{
+                    padding: '8px 14px',
+                    backgroundColor: submissionMode === 'allowed' ? '#6c757d' : '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: (loadingSubmissionMode || submissionMode === 'allowed') ? 'not-allowed' : 'pointer',
+                    opacity: (loadingSubmissionMode || submissionMode === 'allowed') ? 0.7 : 1
+                  }}
+                >
+                  旧サイトでの申請を許可
+                </button>
+              </div>
+            </div>
+
             {/* CSV出力セクション */}
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               {/* 日付種別選択（ラジオボタン） */}

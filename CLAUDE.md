@@ -383,6 +383,64 @@ const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 - `ExpenseForm.tsx` の合計金額を state 更新ではなく `useMemo()` で入力値から直接計算するよう変更
 - TypeScriptチェック: 成功
 
+## ✅ 2026-06-30 新サイト移行に伴う旧サイト申請ブロック機能実装完了
+
+### 🎯 背景
+2026年7月1日より交通費申請を新サイト（fivem-portal: https://fivem-portal.vercel.app）に移行。
+旧サイト（five-m-expense）は閲覧・管理は維持しつつ、一般ユーザーの新規申請のみ止めたい。
+
+### 🎯 実装した機能
+**旧サイトでの交通費申請ブロック＋新サイト案内バナー（管理者は3モードで切替可能）**
+
+#### **1. ExpenseForm.tsx** ✅
+- `NEW_SITE_CUTOVER = 2026-07-01T00:00:00+09:00` を境に、一般ユーザーは送信ボタンを無効化
+- ブロック時はフォーム上部に新サイトへのリンク付き案内バナーを表示
+- 管理者（`isAdmin`）は常に送信可能（自分の確認作業のため）
+- Supabaseの `app_settings` テーブル（key: `expense_submission_mode`）を見て動作を決定
+
+#### **2. AdminPanel.tsx** ✅
+- 「承認管理」タブの最上部に3モードの切り替えボタンを追加
+  - **auto**: 7/1を基準に自動でブロック（デフォルト）
+  - **blocked**: 日付に関係なく強制的に新サイト案内バナーを表示（テストや早期切替に使用）
+  - **allowed**: 日付に関係なく強制的に旧サイトでの申請を許可（管理者がいつでも「戻す」操作）
+- `app_settings.value` を更新すると全ユーザーに即時反映（再デプロイ不要）
+
+#### **3. Supabase（手動でSQL実行済み）** ✅
+```sql
+create table if not exists app_settings (
+  key text primary key,
+  value text not null default 'auto',
+  updated_at timestamptz default now()
+);
+
+insert into app_settings (key, value) values ('expense_submission_mode', 'auto')
+on conflict (key) do nothing;
+
+alter table app_settings enable row level security;
+
+create policy "app_settings_select_authenticated"
+  on app_settings for select
+  using (auth.role() = 'authenticated');
+
+create policy "app_settings_update_admin"
+  on app_settings for update
+  using (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
+```
+
+### ⚠️ 注意事項
+- `app_settings.value` を直接Supabaseで書き換える場合は `'auto'` / `'blocked'` / `'allowed'` のいずれかにすること（他の値は無視されauto扱いにはならず何もマッチしないので注意）
+- 管理者ロールは `auth.app_metadata.role === 'admin'` で判定（既存の `useAuth.ts` と同じ仕組み）
+- このブロックは交通費申請フォームの送信のみが対象。履歴閲覧・管理画面・出張報告などは制限なし
+
+### 📋 修正ファイル
+- `client/src/App.tsx`: `ExpenseForm` に `isAdmin` を渡すよう変更
+- `client/src/components/ExpenseForm.tsx`: 申請ブロック・案内バナー実装
+- `client/src/components/AdminPanel.tsx`: 申請受付モード切り替えUI実装
+
+### ✅ 確認
+- TypeScriptチェック: 成功
+- 本番ビルド（`npm run build`）: 成功
+
 ## 🔜 次回実装予定: 出張報告機能
 
 ### 📋 機能概要

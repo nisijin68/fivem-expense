@@ -136,12 +136,13 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* 交通費申請フォーム */}
-      <ExpenseForm 
-        user={user} 
-        onSubmissionComplete={fetchExpenses} 
+      <ExpenseForm
+        user={user}
+        onSubmissionComplete={fetchExpenses}
         expenses={expenses}
         setExpenses={setExpenses}
         profileName={profileName}
+        isAdmin={isAdmin}
       />
 
       {/* 月別申請状況 - 一般ユーザーのみ表示 */}

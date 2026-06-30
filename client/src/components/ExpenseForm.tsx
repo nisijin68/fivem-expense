@@ -9,11 +9,38 @@ interface ExpenseFormProps {
   expenses: Expense[];
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
   profileName?: string;
+  isAdmin?: boolean;
 }
 
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, expenses, setExpenses, profileName: parentProfileName }) => {
+// 新サイト移行日（この日以降、一般ユーザーは旧サイトでの送信不可）
+const NEW_SITE_CUTOVER = new Date('2026-07-01T00:00:00+09:00');
+const NEW_SITE_URL = 'https://fivem-portal.vercel.app';
+
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, expenses, setExpenses, profileName: parentProfileName, isAdmin }) => {
   const [profileName, setProfileName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionMode, setSubmissionMode] = useState<'auto' | 'blocked' | 'allowed'>('auto');
+
+  useEffect(() => {
+    const fetchSubmissionMode = async () => {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'expense_submission_mode')
+        .single();
+
+      if (!error && (data?.value === 'blocked' || data?.value === 'allowed')) {
+        setSubmissionMode(data.value);
+      }
+    };
+
+    fetchSubmissionMode();
+  }, []);
+
+  const isSubmissionBlocked = !isAdmin && (
+    submissionMode === 'blocked' ||
+    (submissionMode === 'auto' && new Date() >= NEW_SITE_CUTOVER)
+  );
 
   const totalAmount = useMemo(() => {
     return expenses.reduce((sum, expense) => {
@@ -98,6 +125,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
 
   const handleSubmit = async () => {
     if (!user) return;
+    if (isSubmissionBlocked) return;
 
     // 送信中フラグをオンにする
     setIsSubmitting(true);
@@ -244,8 +272,45 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
   return (
     <div>
       <h2 style={{ textAlign: 'center' }}>ファイブM 交通費精算フォーム</h2>
-      
-      <div style={{ 
+
+      {isSubmissionBlocked && (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '2px solid #f5c518',
+          borderRadius: '8px',
+          padding: '16px',
+          margin: '16px 0',
+          fontSize: '14px',
+          lineHeight: '1.7',
+          color: '#664d03'
+        }}>
+          <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '8px' }}>
+            【重要】交通費申請は新サイトに移行しました
+          </div>
+          <div style={{ marginBottom: '12px' }}>
+            2026年7月1日（水）より、交通費申請は新しいスタッフ専用サイトで行っていただいております。
+            お手数ですが、新サイトからログインして申請してください。
+          </div>
+          <a
+            href={NEW_SITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              padding: '10px 16px',
+              background: '#664d03',
+              color: '#fff',
+              borderRadius: 4,
+              textDecoration: 'none',
+              fontWeight: 'bold'
+            }}
+          >
+            新サイトへ移動する →
+          </a>
+        </div>
+      )}
+
+      <div style={{
         backgroundColor: '#f8f9fa', 
         border: '1px solid #dee2e6', 
         borderRadius: '8px', 
@@ -462,20 +527,20 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSubmissionBlocked}
           style={{
             width: '100%',
             padding: 10,
             marginTop: 20,
-            background: isSubmitting ? '#6c757d' : '#007bff',
+            background: (isSubmitting || isSubmissionBlocked) ? '#6c757d' : '#007bff',
             color: 'white',
             border: 'none',
             borderRadius: 4,
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-            opacity: isSubmitting ? 0.6 : 1
+            cursor: (isSubmitting || isSubmissionBlocked) ? 'not-allowed' : 'pointer',
+            opacity: (isSubmitting || isSubmissionBlocked) ? 0.6 : 1
           }}
         >
-          {isSubmitting ? '送信中...' : '申請する'}
+          {isSubmissionBlocked ? '新サイトをご利用ください' : (isSubmitting ? '送信中...' : '申請する')}
         </button>
       </form>
     </div>
