@@ -288,9 +288,33 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ user, onSubmissionComplete, e
             【重要】交通費申請は新サイトに移行しました
           </div>
           <div style={{ marginBottom: '12px' }}>
-            2026年7月1日（水）より、交通費申請は新しいスタッフ専用サイトで行っていただいております。
-            お手数ですが、新サイトからログインして申請してください。
+            2026年7月1日（水）より、交通費申請は新しいスタッフ専用サイトで行っていただくことになりました。
+            旧サイト（このサイト）では7/1以降、交通費申請を受け付けておりません。お手数ですが、新サイトからログインして申請してください。
           </div>
+
+          <div style={{
+            backgroundColor: '#fffbe6',
+            border: '1px solid #f0d878',
+            borderRadius: 6,
+            padding: '12px',
+            marginBottom: '12px'
+          }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>■ ログイン方法</div>
+            <div>・メールアドレス：このサイトにご登録いただいているメールアドレス</div>
+            <div style={{ marginBottom: '6px' }}>
+              ・初期パスワード：メールアドレスの「@」より前の部分<br />
+              　（例：tanaka@example.com の場合 → <span style={{ fontWeight: 'bold' }}>tanaka</span>）
+            </div>
+            <div>
+              ※ログイン後は、画面右上の名前 →「アカウント設定」から、必ずご自身のパスワードに変更してください。
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            ログインできない・パスワードを忘れた場合は、新サイトのログイン画面の「パスワードを忘れた場合」からリセットできます。
+            解決しない場合は管理者にご連絡ください。
+          </div>
+
           <a
             href={NEW_SITE_URL}
             target="_blank"
